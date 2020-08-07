@@ -114,17 +114,13 @@ class VocabEntry(object):
         @param sents (list[list[str]]): sentence(s) in words
         @return word_ids (list[list[list[int]]]): sentence(s) in indices
         """
-        ### YOUR CODE HERE for part 1a
-        ### TODO: 
         ###     This method should convert characters in the input sentences into their 
         ###     corresponding character indices using the character vocabulary char2id 
         ###     defined above.
         ###
         ###     You must prepend each word with the `start_of_word` character and append 
         ###     with the `end_of_word` character. 
-
-
-        ### END YOUR CODE
+        return [[ [self.start_of_word] + [self.char2id[c] for c in w] + [self.end_of_word] for w in s] for s in sents]
 
     def words2indices(self, sents):
         """ Convert list of sentences of words into list of list of indices.
