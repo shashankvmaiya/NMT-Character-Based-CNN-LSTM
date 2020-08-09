@@ -33,16 +33,21 @@ class CNN(nn.Module):
         batch_size, m_word = len(x_reshaped), len(x_reshaped[0][0])
         e_char, e_word, kernel_size = self.char_embed_size, self.word_embed_size, self.kernel_size
 
+        #print('x_reshaped size = {}'.format(x_reshaped.size()))
         assert_expected_size(x_reshaped, 'x_reshaped', [batch_size, e_char, m_word])
 
         x_conv = self.cnn(x_reshaped)
         assert_expected_size(x_conv, 'x_conv', [batch_size, e_word, m_word-kernel_size+1])
+        #print('x_conv size = {}'.format(x_conv.size()))
 
         relu = nn.ReLU()
         maxpool = nn.MaxPool1d(m_word-kernel_size+1)
         x_conv_out = relu(x_conv)
+        #print('x_conv_out (after relu) size = {}'.format(x_conv_out.size()))
         x_conv_out = maxpool(x_conv)
+        #print('x_conv_out (after maxpool) size = {}'.format(x_conv_out.size()))
         x_conv_out = torch.squeeze(x_conv_out, dim=2)
+        #print('x_conv_out size (after squeeze) = {}'.format(x_conv_out.size()))
         assert_expected_size(x_conv_out, 'x_conv_out', [batch_size, e_word])
 
         return x_conv_out

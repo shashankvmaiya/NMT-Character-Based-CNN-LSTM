@@ -56,6 +56,7 @@ class VocabEntry(object):
         assert self.start_of_word+1 == self.end_of_word
 
         self.id2char = {v: k for k, v in self.char2id.items()} # Converts integers to characters
+        print('id2char: {}'.format(self.id2char))
         ## End additions to the A4 code
 
     def __getitem__(self, word):
@@ -120,7 +121,9 @@ class VocabEntry(object):
         ###
         ###     You must prepend each word with the `start_of_word` character and append 
         ###     with the `end_of_word` character. 
-        return [[ [self.start_of_word] + [self.char2id[c] for c in w] + [self.end_of_word] for w in s] for s in sents]
+
+        word_ids = [[ [self.start_of_word] + [self.char2id[c] for c in w] + [self.end_of_word] for w in s] for s in sents]
+        return word_ids
 
     def words2indices(self, sents):
         """ Convert list of sentences of words into list of list of indices.
@@ -147,11 +150,17 @@ class VocabEntry(object):
         """
         ###     Connect `words2charindices()` and `pad_sents_char()` which you've defined in 
         ###     previous parts
-        
+
+        #print('sents: {}'.format(sents))
         word_ids = self.words2charindices(sents)
         word_ids_padded = pad_sents_char(word_ids, self.char2id['<pad>']) # shape = (batch_size, max_sentence_length, max_word_length)
         batch_size, max_sentence_length, max_word_length = len(word_ids_padded), len(word_ids_padded[0]), len(word_ids_padded[0][0])
-        return torch.reshape(torch.tensor(word_ids_padded), (max_sentence_length, batch_size, max_word_length))
+
+        #print('word_ids_padded: {}'.format(word_ids_padded))
+        #sents_var = torch.reshape(torch.tensor(word_ids_padded), (max_sentence_length, batch_size, max_word_length))
+        sents_var = torch.tensor(word_ids_padded).permute(1, 0, 2)
+        #print('sents_var: {}'.format(sents_var))
+        return sents_var
 
     def to_input_tensor(self, sents: List[List[str]], device: torch.device) -> torch.Tensor:
         """ Convert list of sentences (words) into tensor with necessary padding for 

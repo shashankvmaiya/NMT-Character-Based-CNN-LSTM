@@ -69,7 +69,7 @@ class NMT(nn.Module):
         """
         # Compute sentence lengths
         source_lengths = [len(s) for s in source]
-        
+
         # Convert list of lists into tensors
 
         ## A4 code
@@ -141,7 +141,8 @@ class NMT(nn.Module):
         """
         enc_hiddens, dec_init_state = None, None
 
-        X = self.model_embeddings_source(source_padded)
+        #X = self.model_embeddings_source(source_padded)
+        X = self.model_embeddings_source.forward(source_padded)
         X_packed = pack_padded_sequence(X, source_lengths)
         enc_hiddens, (last_hidden, last_cell) = self.encoder(X_packed)
         (enc_hiddens, _) = pad_packed_sequence(enc_hiddens)
