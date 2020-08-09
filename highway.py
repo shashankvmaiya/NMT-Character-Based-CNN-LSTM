@@ -3,7 +3,6 @@
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.nn.utils
 
 from utils import assert_expected_size
@@ -32,8 +31,7 @@ class Highway(nn.Module):
         x_proj = relu(self.w_projection(x_conv_out)) # shape = (b, e_word)
         assert_expected_size(x_proj, 'x_proj', [batch_size, e_word])
 
-        sigmoid = nn.Sigmoid()
-        x_gate = sigmoid(self.w_gate(x_proj)) # shape = (b, e_word)
+        x_gate = torch.sigmoid(self.w_gate(x_conv_out)) # shape = (b, e_word)
         assert_expected_size(x_gate, 'x_gate', [batch_size, e_word])
 
         x_highway = x_gate*x_proj + (1-x_gate)*x_conv_out
