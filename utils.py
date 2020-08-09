@@ -9,6 +9,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+def assert_expected_size(variable, variable_name, expected_size):
+    assert (list(
+    variable.size()) == expected_size), "{} shape is incorrect: it should be:\n {} but is:\n{}".format(
+    variable_name, expected_size, list(variable.size()))
+
 def pad_sents_char(sents, char_pad_token):
     """ Pad list of sentences according to the longest sentence in the batch and max_word_length.
     @param sents (list[list[list[int]]]): list of sentences, result of `words2charindices()` 
@@ -23,8 +28,6 @@ def pad_sents_char(sents, char_pad_token):
     # Words longer than 21 characters should be truncated
     max_word_length = 21 
 
-    ### YOUR CODE HERE for part 1b
-    ### TODO:
     ###     Perform necessary padding to the sentences in the batch similar to the pad_sents() 
     ###     method below using the padding character from the arguments. You should ensure all 
     ###     sentences have the same number of words and each word has the same number of 
@@ -34,8 +37,9 @@ def pad_sents_char(sents, char_pad_token):
     ###     You should NOT use the method `pad_sents()` below because of the way it handles 
     ###     padding and unknown words.
 
-
-    ### END YOUR CODE
+    sents_padded = []
+    max_sentence_length = max([len(s) for s in sents])
+    sents_padded = [[s[i] + [char_pad_token]*(max_word_length-len(s[i])) if i<len(s) else [char_pad_token]*max_word_length for i in range(max_sentence_length)] for s in sents]
 
     return sents_padded
 

@@ -46,13 +46,13 @@ class NMT(nn.Module):
 
         self.h_projection = nn.Linear(hidden_size * 2, hidden_size, bias=False)
         self.c_projection = nn.Linear(hidden_size * 2, hidden_size, bias=False)
-        self.att_projection = nn.Linear(hidden_size * 2, hidden_size, bias=False)    
-        self.combined_output_projection = nn.Linear(hidden_size * 2 + hidden_size, hidden_size, bias=False)        
+        self.att_projection = nn.Linear(hidden_size * 2, hidden_size, bias=False)
+        self.combined_output_projection = nn.Linear(hidden_size * 2 + hidden_size, hidden_size, bias=False)
         self.target_vocab_projection = nn.Linear(hidden_size, len(vocab.tgt), bias=False)
         self.dropout = nn.Dropout(self.dropout_rate)
 
         if not no_char_decoder:
-           self.charDecoder = CharDecoder(hidden_size, target_vocab=vocab.tgt) 
+           self.charDecoder = CharDecoder(hidden_size, target_vocab=vocab.tgt)
         else:
            self.charDecoder = None
 
@@ -69,7 +69,7 @@ class NMT(nn.Module):
         """
         # Compute sentence lengths
         source_lengths = [len(s) for s in source]
-
+        
         # Convert list of lists into tensors
 
         ## A4 code
@@ -80,7 +80,15 @@ class NMT(nn.Module):
         # enc_masks = self.generate_sent_masks(enc_hiddens, source_lengths)
         # combined_outputs = self.decode(enc_hiddens, enc_masks, dec_init_state, target_padded)
         ## End A4 code
-        
+        source_padded_chars = self.vocab.src.to_input_tensor_char(source, device=self.device)
+        target_padded_chars = self.vocab.tgt.to_input_tensor_char(target, device=self.device)
+        #source_padded = self.vocab.src.to_input_tensor(source, device=self.device)
+        target_padded = self.vocab.tgt.to_input_tensor(target, device=self.device)
+
+        enc_hiddens, dec_init_state = self.encode(source_padded_chars, source_lengths)
+        enc_masks = self.generate_sent_masks(enc_hiddens, source_lengths)
+        combined_outputs = self.decode(enc_hiddens, enc_masks, dec_init_state, target_padded_chars)
+
         ### YOUR CODE HERE for part 1g
         ### TODO: 
         ###     Modify the code lines above as needed to fetch the character-level tensor 
