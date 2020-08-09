@@ -43,7 +43,7 @@ class CNN(nn.Module):
         maxpool = nn.MaxPool1d(m_word-kernel_size+1)
         x_conv_out = relu(x_conv)
         #print('x_conv_out (after relu) size = {}'.format(x_conv_out.size()))
-        x_conv_out = maxpool(x_conv)
+        x_conv_out = maxpool(x_conv_out)
         #print('x_conv_out (after maxpool) size = {}'.format(x_conv_out.size()))
         x_conv_out = torch.squeeze(x_conv_out, dim=2)
         #print('x_conv_out size (after squeeze) = {}'.format(x_conv_out.size()))

@@ -36,6 +36,5 @@ class Highway(nn.Module):
 
         x_highway = x_gate*x_proj + (1-x_gate)*x_conv_out
         assert_expected_size(x_highway, 'x_highway', [batch_size, e_word])
-
         return x_highway
 
