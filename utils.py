@@ -39,7 +39,16 @@ def pad_sents_char(sents, char_pad_token):
 
     sents_padded = []
     max_sentence_length = max([len(s) for s in sents])
-    sents_padded = [[s[i] + [char_pad_token]*(max_word_length-len(s[i])) if i<len(s) else [char_pad_token]*max_word_length for i in range(max_sentence_length)] for s in sents]
+    # for s in sents:
+    #     curr_sent_padded = []
+    #     for i in range(max_sentence_length):
+    #         if i<len(s):
+    #             curr_sent_padded.append(s[i][:min(max_word_length, len(s[i]))] + [char_pad_token]*(max_word_length-len(s[i])))
+    #         else:
+    #             curr_sent_padded.append([char_pad_token]*max_word_length)
+    #     sents_padded.append(curr_sent_padded)
+    sents_padded = [[s[i][:min(max_word_length, len(s[i]))] + [char_pad_token]*(max_word_length-len(s[i])) if i<len(s) else [char_pad_token]*max_word_length for i in range(max_sentence_length)] for s in sents]
+    #sents_padded = [[s[i] + [char_pad_token]*(max_word_length-len(s[i])) if i<len(s) else [char_pad_token]*max_word_length for i in range(max_sentence_length)] for s in sents]
 
     return sents_padded
 
