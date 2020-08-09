@@ -26,7 +26,7 @@ def pad_sents_char(sents, char_pad_token):
         Output shape: (batch_size, max_sentence_length, max_word_length)
     """
     # Words longer than 21 characters should be truncated
-    max_word_length = 21 
+    max_word_length = 21
 
     ###     Perform necessary padding to the sentences in the batch similar to the pad_sents() 
     ###     method below using the padding character from the arguments. You should ensure all 
@@ -39,15 +39,20 @@ def pad_sents_char(sents, char_pad_token):
 
     sents_padded = []
     max_sentence_length = max([len(s) for s in sents])
-    # for s in sents:
-    #     curr_sent_padded = []
-    #     for i in range(max_sentence_length):
-    #         if i<len(s):
-    #             curr_sent_padded.append(s[i][:min(max_word_length, len(s[i]))] + [char_pad_token]*(max_word_length-len(s[i])))
-    #         else:
-    #             curr_sent_padded.append([char_pad_token]*max_word_length)
-    #     sents_padded.append(curr_sent_padded)
-    sents_padded = [[s[i][:min(max_word_length, len(s[i]))] + [char_pad_token]*(max_word_length-len(s[i])) if i<len(s) else [char_pad_token]*max_word_length for i in range(max_sentence_length)] for s in sents]
+    for s in sents: # Every sentence
+        curr_sent_padded = []
+        for i in range(max_sentence_length): # Each word in the sentence up to max words
+            if i<len(s):
+                if len(s[i])>max_word_length: # truncating if length of word > max_word_length
+                    curr_word_padded = s[i][:max_word_length-1] + [s[i][-1]] # Including the end_of_word id at the end of s[i]
+                    #curr_word_padded = s[i][:max_word_length] # Not including the end_of_word id at the end of s[i]
+                else:
+                    curr_word_padded = s[i] + [char_pad_token]*(max_word_length-len(s[i]))
+                curr_sent_padded.append(curr_word_padded)
+            else: # rest are all padded words till the max_sentence_length
+                curr_sent_padded.append([char_pad_token]*max_word_length)
+        sents_padded.append(curr_sent_padded)
+    #sents_padded = [[s[i][:min(max_word_length, len(s[i]))] + [char_pad_token]*(max_word_length-len(s[i])) if i<len(s) else [char_pad_token]*max_word_length for i in range(max_sentence_length)] for s in sents]
     #sents_padded = [[s[i] + [char_pad_token]*(max_word_length-len(s[i])) if i<len(s) else [char_pad_token]*max_word_length for i in range(max_sentence_length)] for s in sents]
 
     return sents_padded
