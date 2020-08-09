@@ -110,13 +110,12 @@ class NMT(nn.Module):
         target_gold_words_log_prob = torch.gather(P, index=target_padded[1:].unsqueeze(-1), dim=-1).squeeze(-1) * target_masks[1:]
         scores = target_gold_words_log_prob.sum() # mhahn2 Small modification from A4 code.
 
-
-
         if self.charDecoder is not None:
             max_word_len = target_padded_chars.shape[-1]
 
             target_words = target_padded[1:].contiguous().view(-1)
             target_chars = target_padded_chars[1:].view(-1, max_word_len)
+            #target_chars = target_padded_chars[1:].reshape(-1, max_word_len)
             target_outputs = combined_outputs.view(-1, 256)
     
             target_chars_oov = target_chars #torch.index_select(target_chars, dim=0, index=oovIndices)

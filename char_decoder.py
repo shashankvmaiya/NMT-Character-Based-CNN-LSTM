@@ -3,6 +3,7 @@
 
 import torch
 import torch.nn as nn
+from utils import assert_expected_size
 
 class CharDecoder(nn.Module):
     def __init__(self, hidden_size, char_embedding_size=50, target_vocab=None):
@@ -23,12 +24,21 @@ class CharDecoder(nn.Module):
         ### Hint: - Use target_vocab.char2id to access the character vocabulary for the target language.
         ###       - Set the padding_idx argument of the embedding matrix.
         ###       - Create a new Embedding layer. Do not reuse embeddings created in Part 1 of this assignment.
-        
+        super(CharDecoder, self).__init__()
+        self.vocab_size = len(target_vocab.char2id)
+        self.char_embedding_size = char_embedding_size
+        self.hidden_size = hidden_size
+        pad_token_idx = target_vocab.char2id['<pad>']
+
+        self.charDecoder = nn.LSTM(char_embedding_size, hidden_size)
+        self.char_output_projection = nn.Linear(hidden_size, self.vocab_size, bias=True)
+        self.decoderCharEmb = nn.Embedding(self.vocab_size, char_embedding_size, padding_idx=pad_token_idx)
+        self.target_vocab = target_vocab
 
         ### END YOUR CODE
 
 
-    
+
     def forward(self, input, dec_hidden=None):
         """ Forward pass of character decoder.
 
@@ -40,9 +50,22 @@ class CharDecoder(nn.Module):
         """
         ### YOUR CODE HERE for part 2b
         ### TODO - Implement the forward pass of the character decoder.
-        
-        
-        ### END YOUR CODE 
+
+        length, batch_size = input.size() # length = m_word = number of characters in the word
+
+        x_embeddings = self.decoderCharEmb(input)
+        assert_expected_size(x_embeddings, 'x_embeddings', [length, batch_size, self.char_embedding_size])
+
+        enc_hiddens, (hn, cn) = self.charDecoder(x_embeddings, dec_hidden)
+        assert_expected_size(enc_hiddens, 'enc_hiddens', [length, batch_size, self.hidden_size])
+        assert_expected_size(hn, 'hn', [1, batch_size, self.hidden_size])
+        assert_expected_size(cn, 'cn', [1, batch_size, self.hidden_size])
+
+        scores = self.char_output_projection(enc_hiddens)
+        assert_expected_size(scores, 'scores', [length, batch_size, self.vocab_size])
+
+        return scores, (hn, cn)
+        ### END YOUR CODE
 
 
     def train_forward(self, char_sequence, dec_hidden=None):
@@ -59,7 +82,17 @@ class CharDecoder(nn.Module):
         ### Hint: - Make sure padding characters do not contribute to the cross-entropy loss.
         ###       - char_sequence corresponds to the sequence x_1 ... x_{n+1} from the handout (e.g., <START>,m,u,s,i,c,<END>).
 
+        length, batch_size = char_sequence.size() # length = m_word = number of characters in the word
 
+        scores, (hn, cn) = self.forward(char_sequence, dec_hidden)
+        assert_expected_size(scores, 'scores', [length, batch_size, self.vocab_size])
+        assert_expected_size(hn, 'hn', [1, batch_size, self.hidden_size])
+        assert_expected_size(cn, 'cn', [1, batch_size, self.hidden_size])
+
+        loss = nn.CrossEntropyLoss(reduction='sum')
+        cross_entropy_loss = sum([loss(scores[i,:,:], char_sequence[i,:]) for i in range(length)])
+
+        return cross_entropy_loss
         ### END YOUR CODE
 
     def decode_greedy(self, initialStates, device, max_length=21):
@@ -79,7 +112,21 @@ class CharDecoder(nn.Module):
         ###      - Use torch.tensor(..., device=device) to turn a list of character indices into a tensor.
         ###      - We use curly brackets as start-of-word and end-of-word characters. That is, use the character '{' for <START> and '}' for <END>.
         ###        Their indices are self.target_vocab.start_of_word and self.target_vocab.end_of_word, respectively.
-        
-        
+
+        batch_size = len(initialStates[0][0])
+        current_char_id = torch.tensor([self.target_vocab.start_of_word]*batch_size).reshape((1, batch_size))
+        assert_expected_size(current_char_id, 'current_char_id', [1, batch_size])
+
+        decodedWords = ['']*batch_size
+        dec_hidden = initialStates
+        for i in range(max_length):
+            scores, dec_hidden = self.forward(current_char_id, dec_hidden)
+            assert_expected_size(scores, 'scores', [1, batch_size, self.vocab_size])
+            current_char_id = torch.argmax(scores, dim=2)
+            decodedWords = [d+self.target_vocab.id2char[c.item()] for (c, d) in zip(current_char_id.squeeze(dim=0), decodedWords)]
+
+        decodedWords = [d[:d.find('}')] if '}' in d else d for d in decodedWords]
+        return decodedWords
+
         ### END YOUR CODE
 
