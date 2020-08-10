@@ -158,10 +158,10 @@ class VocabEntry(object):
         word_ids_padded = pad_sents_char(word_ids, self.char2id['<pad>']) # shape = (batch_size, max_sentence_length, max_word_length)
         max_word_length = len(word_ids_padded[0][0])
         #print('word_ids_padded: {}'.format(word_ids_padded))
-        assert_expected_size(torch.tensor(word_ids_padded), 'word_ids_padded', [batch_size, max_sentence_length, max_word_length])
+        assert_expected_size(torch.tensor(word_ids_padded, device=device), 'word_ids_padded', [batch_size, max_sentence_length, max_word_length])
 
         #sents_var = torch.reshape(torch.tensor(word_ids_padded), (max_sentence_length, batch_size, max_word_length))
-        sents_var = torch.tensor(word_ids_padded).permute(1, 0, 2)
+        sents_var = torch.tensor(word_ids_padded, device=device).permute(1, 0, 2)
         assert_expected_size(sents_var, 'sents_var', [max_sentence_length, batch_size, max_word_length])
         #print('sents_var: {}'.format(sents_var))
         return sents_var.contiguous()

@@ -118,7 +118,7 @@ class CharDecoder(nn.Module):
         ###        Their indices are self.target_vocab.start_of_word and self.target_vocab.end_of_word, respectively.
 
         batch_size = len(initialStates[0][0])
-        current_char_id = torch.tensor([self.target_vocab.start_of_word]*batch_size).reshape((1, batch_size))
+        current_char_id = torch.tensor([self.target_vocab.start_of_word]*batch_size).reshape((1, batch_size), device=device)
         assert_expected_size(current_char_id, 'current_char_id', [1, batch_size])
 
         decodedWords = ['']*batch_size
