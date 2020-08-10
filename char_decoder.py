@@ -90,7 +90,11 @@ class CharDecoder(nn.Module):
         assert_expected_size(cn, 'cn', [1, batch_size, self.hidden_size])
 
         loss = nn.CrossEntropyLoss(reduction='sum')
-        cross_entropy_loss = sum([loss(scores[i,:,:], char_sequence[i,:]) for i in range(length)])
+        cross_entropy_loss = 0
+        for i in range(batch_size):
+            if self.target_vocab.end_of_word in char_sequence[:,i]:
+                end_id = (char_sequence[:,i]==self.target_vocab.end_of_word).nonzero()
+                cross_entropy_loss += loss(scores[:end_id,i,:], char_sequence[1:end_id+1,i])
 
         return cross_entropy_loss
         ### END YOUR CODE
