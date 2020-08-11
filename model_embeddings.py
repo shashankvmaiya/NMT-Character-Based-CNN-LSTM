@@ -55,7 +55,7 @@ class ModelEmbeddings(nn.Module):
         #print('input_tensor = {}'.format(input_tensor))
 
         # Reshaping input tensor with a revised batch_size = sentence_length*batch_size
-        x_padded = torch.reshape(input_tensor.permute(1, 0, 2), (sentence_length*batch_size, m_word))
+        x_padded = torch.reshape(input_tensor, (sentence_length*batch_size, m_word))
         assert_expected_size(x_padded, 'x_padded', [sentence_length*batch_size, m_word])
         #print('x_padded size = {}'.format(x_padded.size()))
         #print('x_padded = {}'.format(x_padded))
@@ -64,7 +64,6 @@ class ModelEmbeddings(nn.Module):
         assert_expected_size(x_emb, 'x_emb', [sentence_length*batch_size, m_word, e_char])
         #print('x_emb size = {}'.format(x_emb.size()))
 
-        #x_reshaped = torch.reshape(x_emb, (sentence_length*batch_size, e_char, m_word))
         x_reshaped = x_emb.permute(0, 2, 1)
         assert_expected_size(x_reshaped, 'x_reshaped', [sentence_length*batch_size, e_char, m_word])
         #print('x_reshaped size = {}'.format(x_reshaped.size()))
@@ -83,8 +82,7 @@ class ModelEmbeddings(nn.Module):
 
         #output = torch.reshape(x_word_emb, (sentence_length, batch_size, e_word))
         #assert_expected_size(output, 'output', [sentence_length, batch_size, e_word])
-        output = torch.reshape(x_word_emb, (batch_size, sentence_length, e_word))
-        output = output.permute(1, 0, 2)
+        output = torch.reshape(x_word_emb, (sentence_length, batch_size, e_word))
         assert_expected_size(output, 'output', [sentence_length, batch_size, e_word])
         #print('output size = {}'.format(output.size()))
 

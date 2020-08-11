@@ -3,3 +3,4 @@ __pycache__/
 */__pycache__/
 model.bin
 model.bin.optim
+assignment*.zip
